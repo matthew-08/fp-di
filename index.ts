@@ -1,20 +1,34 @@
 import knexFactory from 'knex';
+import { program } from 'commander';
+import { todoController } from './main';
 
-const knex = knexFactory({
-  client: 'pg',
-  connection: {
-    host: 'localhost',
-    port: 5432,
-    user: 'postgres',
-    database: 'todo',
-    password: 'password',
-    ssl: false,
-  },
-});
+function main() {
+  // init db
+  // init cli
 
-const getTodos = async () => {
-  const todo = await knex.select('*').from('todo');
-  console.log(todo);
-};
+  program
+    .name('Todo CLI')
+    .description(
+      'Simple application for creating and deleting Todos via a CLI'
+    );
 
-getTodos();
+  program
+    .command('create <title> <desc> <priority>')
+    .description('Create a new todo')
+    .action(async (title, description, priority) => {
+      try {
+        const result = await todoController.handleCreateTodo({
+          description,
+          priority,
+          title,
+        });
+        console.log(`Inserted todo: ${JSON.stringify(result)}`);
+      } catch (error: any) {
+        console.error(`Error inserting todo: ${error.message}`);
+      }
+    });
+
+  program.parse();
+}
+
+main();
